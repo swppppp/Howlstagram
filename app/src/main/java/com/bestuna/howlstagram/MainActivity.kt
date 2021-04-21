@@ -1,0 +1,95 @@
+package com.bestuna.howlstagram
+
+import android.app.Activity
+import android.content.Intent
+import android.content.pm.PackageManager
+import androidx.appcompat.app.AppCompatActivity
+import android.os.Bundle
+import android.view.MenuItem
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import androidx.core.view.isVisible
+import androidx.databinding.DataBindingUtil
+import com.bestuna.howlstagram.databinding.ActivityMainBinding
+import com.bestuna.navigation.*
+import com.google.android.gms.tasks.Task
+import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.UploadTask
+import java.util.jar.Manifest
+
+class MainActivity : AppCompatActivity() {
+    lateinit var bb: ActivityMainBinding
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        bb = DataBindingUtil.setContentView(this, R.layout.activity_main)
+
+        ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE), 1)
+
+        bb.bottomNavigation.setOnNavigationItemSelectedListener { item ->
+            setToolbarDefault()
+            when(item.itemId) {
+                R.id.action_home -> {
+                    var detailViewFragment = DetailViewFragment()
+                    supportFragmentManager.beginTransaction().replace(R.id.main_content, detailViewFragment).commit()
+                    return@setOnNavigationItemSelectedListener true
+                }
+                R.id.action_search -> {
+                    var gridFragment = GridFragment()
+                    supportFragmentManager.beginTransaction().replace(R.id.main_content, gridFragment).commit()
+                    return@setOnNavigationItemSelectedListener true
+                }
+                R.id.action_add_photo -> {
+                    if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+                        startActivity(Intent(this, AddPhotoActivity::class.java))
+                    }
+                    return@setOnNavigationItemSelectedListener true
+                }
+                R.id.action_favorite_alarm -> {
+                    var alarmFragment = AlarmFragment()
+                    supportFragmentManager.beginTransaction().replace(R.id.main_content, alarmFragment).commit()
+                    return@setOnNavigationItemSelectedListener true
+                }
+                R.id.action_account -> {
+                    var userFragment = UserFragment()
+                    var bundle = Bundle()
+                    var uid = FirebaseAuth.getInstance().currentUser?.uid
+                    bundle.putString("destinationUid", uid)
+                    userFragment.arguments = bundle
+                    supportFragmentManager.beginTransaction().replace(R.id.main_content, userFragment).commit()
+                    return@setOnNavigationItemSelectedListener true
+                }
+            }
+            return@setOnNavigationItemSelectedListener false
+        }
+
+        bb.bottomNavigation.selectedItemId = R.id.action_home
+
+    }
+
+    fun setToolbarDefault() {
+        bb.toolbarUsername.isVisible = false
+        bb.toolbarBtnBack.isVisible = false
+        bb.toolbarTitleImage.isVisible = true
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == UserFragment.PICK_PROFILE_FROM_ALBUM && resultCode == Activity.RESULT_OK) {
+            var imageUri = data?.data
+            var uid = FirebaseAuth.getInstance().currentUser.uid
+            var storageRef = FirebaseStorage.getInstance().reference.child("userProfileImages").child(uid)
+            storageRef?.putFile(imageUri!!).continueWithTask { task: Task<UploadTask.TaskSnapshot> ->
+                return@continueWithTask storageRef.downloadUrl
+            }.addOnSuccessListener { uri ->
+                var map = HashMap<String, Any>()
+                map["image"] = uri.toString()
+                FirebaseFirestore.getInstance().collection("profileImage").document(uid).set(map)
+            }
+        }
+    }
+}

@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "140727360206",
+    "project_id": "howlstagram-f173d",
+    "storage_bucket": "howlstagram-f173d.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:140727360206:android:876ab9d6a9e7182a458e9f",
+        "android_client_info": {
+          "package_name": "com.bestuna.howlstagram"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "140727360206-iit1b8jk5ud7uojrq0foavc5tosv9mb3.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAshvYsjZfOoCiqeegO9gNwWdra4odgnV8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "140727360206-iit1b8jk5ud7uojrq0foavc5tosv9mb3.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
